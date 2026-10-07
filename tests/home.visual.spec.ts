@@ -14,7 +14,7 @@ for (const viewport of cases) {
       "Find what you need, close to home.",
     );
     await expect(page.getByRole("search")).toBeVisible();
-    await expect(page.getByText("Harford County first")).toBeVisible();
+    await expect(page.getByText("Harford County first", { exact: true })).toBeVisible();
     await expect(page.getByText("Local utility, not hype")).toBeVisible();
 
     const overflow = await page.evaluate(
