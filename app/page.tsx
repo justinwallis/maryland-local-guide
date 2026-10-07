@@ -10,7 +10,11 @@ const serviceCategories = [
   "Tree Service",
 ];
 
-const communities = ["Aberdeen", "Havre de Grace", "Bel Air"];
+const communities = [
+  { name: "Aberdeen", href: "/maryland/harford-county/aberdeen" },
+  { name: "Havre de Grace", href: "/maryland/harford-county/havre-de-grace" },
+  { name: "Bel Air", href: "/maryland/harford-county/bel-air" },
+];
 
 const projectSteps = [
   {
@@ -138,20 +142,20 @@ export default function Home() {
             <p className="eyebrow">Explore nearby</p>
             <h2>Start with a community you know.</h2>
           </div>
-          <a className="text-link" href="#communities">Explore Harford →</a>
+          <a className="text-link" href="/maryland/harford-county">Explore Harford →</a>
         </div>
 
         <div className="community-grid">
           {communities.map((community) => (
-            <article className="community-card" key={community}>
+            <article className="community-card" key={community.name}>
               <div className="community-art" aria-hidden="true">
                 <span>Maryland</span>
               </div>
               <div>
                 <p className="card-kicker">Harford County</p>
-                <h3>{community}</h3>
+                <h3>{community.name}</h3>
                 <p>Services, local resources, places, and practical guides.</p>
-                <a className="text-link" href="#communities">Explore {community} →</a>
+                <a className="text-link" href={community.href}>Explore {community.name} →</a>
               </div>
             </article>
           ))}
