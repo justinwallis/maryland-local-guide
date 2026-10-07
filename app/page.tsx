@@ -1,3 +1,6 @@
+import { SiteFooter } from "../components/SiteFooter";
+import { SiteHeader } from "../components/SiteHeader";
+
 const serviceCategories = [
   "Masonry",
   "Landscaping",
@@ -33,39 +36,7 @@ const projectSteps = [
 export default function Home() {
   return (
     <main>
-      <header className="site-header">
-        <div className="shell nav-shell">
-          <a className="brand" href="/" aria-label="Maryland Local Guide home">
-            <span className="brand-mark" aria-hidden="true">MD</span>
-            <span>
-              <strong>Maryland</strong>
-              <em>Local Guide</em>
-            </span>
-          </a>
-
-          <nav className="desktop-nav" aria-label="Primary navigation">
-            <a href="#services">Find Services</a>
-            <a href="#places">Browse Places</a>
-            <a href="#communities">Explore Maryland</a>
-            <a href="#resources">Resources</a>
-          </nav>
-
-          <a className="button button-gold nav-cta" href="#business">
-            Add Your Business
-          </a>
-
-          <details className="mobile-menu">
-            <summary aria-label="Open navigation">Menu</summary>
-            <nav aria-label="Mobile navigation">
-              <a href="#services">Find Services</a>
-              <a href="#places">Browse Places</a>
-              <a href="#communities">Explore Maryland</a>
-              <a href="#resources">Resources</a>
-              <a href="#business">Add Your Business</a>
-            </nav>
-          </details>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="hero">
         <div className="shell hero-grid">
@@ -77,7 +48,7 @@ export default function Home() {
               rentals, places, and useful community resources.
             </p>
 
-            <form className="search-panel" action="#" role="search">
+            <form className="search-panel" action="/search" method="get" role="search">
               <label>
                 <span>What do you need help with?</span>
                 <input
@@ -206,43 +177,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="footer" id="business">
-        <div className="shell footer-grid">
-          <div>
-            <a className="brand brand-footer" href="/" aria-label="Maryland Local Guide home">
-              <span className="brand-mark" aria-hidden="true">MD</span>
-              <span>
-                <strong>Maryland</strong>
-                <em>Local Guide</em>
-              </span>
-            </a>
-            <p className="footer-copy">
-              Harford County first. Built to make local discovery more useful.
-            </p>
-          </div>
-
-          <div>
-            <h3>Explore</h3>
-            <a href="#services">Find Services</a>
-            <a href="#communities">Communities</a>
-            <a href="#places">Places</a>
-          </div>
-
-          <div id="places">
-            <h3>For businesses</h3>
-            <a href="#business">Add Your Business</a>
-            <a href="#business">Update a Listing</a>
-            <a href="#business">Suggest a Correction</a>
-          </div>
-
-          <div>
-            <h3>About</h3>
-            <a href="#resources">How it works</a>
-            <a href="#resources">Trust & sources</a>
-            <a href="#resources">Contact</a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
