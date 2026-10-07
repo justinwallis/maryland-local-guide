@@ -53,6 +53,17 @@ export default function Home() {
           <a className="button button-gold nav-cta" href="#business">
             Add Your Business
           </a>
+
+          <details className="mobile-menu">
+            <summary aria-label="Open navigation">Menu</summary>
+            <nav aria-label="Mobile navigation">
+              <a href="#services">Find Services</a>
+              <a href="#places">Browse Places</a>
+              <a href="#communities">Explore Maryland</a>
+              <a href="#resources">Resources</a>
+              <a href="#business">Add Your Business</a>
+            </nav>
+          </details>
         </div>
       </header>
 
@@ -89,8 +100,8 @@ export default function Home() {
             </form>
 
             <p className="search-note">
-              Slice 01 presentation only. Live search remains owned by the
-              canonical WordPress/Directorist search contract.
+              Search presentation is ready. Live directory results connect in
+              the next implementation slice.
             </p>
           </div>
 
