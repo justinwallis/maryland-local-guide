@@ -22,6 +22,16 @@ for (const viewport of cases) {
     );
     expect(overflow).toBe(false);
 
+    await page.keyboard.press("Tab");
+    const activeTag = await page.evaluate(() => document.activeElement?.tagName);
+    expect(activeTag).not.toBe("BODY");
+
+    if (viewport.name === "phone") {
+      await page.getByText("Menu", { exact: true }).click();
+      await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+      await page.getByText("Menu", { exact: true }).click();
+    }
+
     await page.screenshot({
       path: `artifacts/home-${viewport.name}.png`,
       fullPage: true,
