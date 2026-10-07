@@ -16,6 +16,7 @@ const representativeResults = [
     location: "Aberdeen & surrounding Harford County",
     precision: "Service area",
     summary: "Representative result-card state for a local masonry service.",
+    slug: "service-area-preview",
   },
   {
     category: "Water & Well",
@@ -23,6 +24,7 @@ const representativeResults = [
     location: "Harford County",
     precision: "Service area",
     summary: "Representative result-card state for well and water service.",
+    slug: "service-area-preview",
   },
   {
     category: "Tree Service",
@@ -30,6 +32,7 @@ const representativeResults = [
     location: "Havre de Grace & nearby communities",
     precision: "Service area",
     summary: "Representative result-card state for local tree service.",
+    slug: "service-area-preview",
   },
 ];
 
@@ -163,7 +166,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     <p>{result.summary}</p>
                     <p className="representative-note">Not live directory data.</p>
                     <div className="result-actions">
-                      <span className="button button-gold button-static">View details</span>
+                      <a className="button button-gold" href={`/listing/${result.slug}`}>View details</a>
                       <span className="button button-secondary button-static">Website</span>
                     </div>
                   </div>
