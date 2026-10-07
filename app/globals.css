@@ -1336,3 +1336,178 @@ h3 {
     min-height: 210px;
   }
 }
+
+
+/* Slice 04 — County / Community Hubs */
+
+.hub-hero {
+  padding: 48px 0 54px;
+  background: linear-gradient(180deg, var(--cream), #fff);
+  border-bottom: 1px solid var(--border);
+}
+
+.hub-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 42px;
+  align-items: center;
+}
+
+.hub-title {
+  max-width: 760px;
+  margin-bottom: 12px;
+  color: var(--navy);
+  font-size: clamp(3rem, 6vw, 5.4rem);
+}
+
+.hub-lede {
+  max-width: 720px;
+  margin-bottom: 18px;
+  color: var(--slate);
+  font-size: 18px;
+}
+
+.hub-visual {
+  display: flex;
+  align-items: end;
+  min-height: 290px;
+  padding: 20px;
+  background:
+    linear-gradient(145deg, rgba(6,27,44,.2), rgba(6,27,44,.7)),
+    repeating-linear-gradient(120deg, #80948d 0 20px, #6d827b 20px 40px);
+  color: white;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+}
+
+.hub-section {
+  padding-top: 68px;
+  padding-bottom: 68px;
+}
+
+.hub-section-cream {
+  background: var(--cream);
+}
+
+.hub-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.hub-action-card {
+  display: block;
+  min-height: 260px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  background: white;
+}
+
+.hub-action-card:hover {
+  border-color: var(--navy);
+}
+
+.hub-action-number {
+  display: inline-block;
+  margin-bottom: 46px;
+  color: #8a5b00;
+  font-weight: 800;
+}
+
+.hub-action-card h3 {
+  margin-bottom: 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+}
+
+.hub-action-card p {
+  color: var(--slate);
+}
+
+.hub-community-grid,
+.hub-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.hub-community-card,
+.hub-editorial-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: white;
+}
+
+.hub-community-card > div:last-child,
+.hub-editorial-card > div:last-child {
+  padding: 22px;
+}
+
+.hub-community-art,
+.hub-editorial-art {
+  display: flex;
+  align-items: end;
+  aspect-ratio: 16 / 9;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, rgba(6,27,44,.28), rgba(6,27,44,.72)),
+    repeating-linear-gradient(115deg, #7f938c 0 18px, #6d817a 18px 36px);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hub-community-card h3,
+.hub-editorial-card h3 {
+  margin-bottom: 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+}
+
+.hub-community-card p:not(.card-kicker),
+.hub-editorial-card p:not(.card-kicker) {
+  color: var(--slate);
+}
+
+.hub-editorial-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.hub-trust {
+  margin-top: 0;
+}
+
+@media (max-width: 960px) {
+  .hub-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-visual {
+    min-height: 220px;
+  }
+
+  .hub-action-grid,
+  .hub-community-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .hub-hero {
+    padding-top: 34px;
+  }
+
+  .hub-action-grid,
+  .hub-community-grid,
+  .hub-editorial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-action-card {
+    min-height: 0;
+  }
+
+  .hub-action-number {
+    margin-bottom: 30px;
+  }
+}
