@@ -118,6 +118,42 @@ select {
   color: var(--gold);
 }
 
+.mobile-menu {
+  display: none;
+}
+
+.mobile-menu summary {
+  list-style: none;
+}
+
+.mobile-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-menu nav {
+  position: absolute;
+  top: 62px;
+  right: 14px;
+  min-width: 220px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: var(--navy-deep);
+  box-shadow: var(--shadow);
+}
+
+.mobile-menu nav a {
+  display: block;
+  padding: 11px 12px;
+  color: white;
+  font-size: 14px;
+}
+
+.mobile-menu nav a:hover,
+.mobile-menu nav a:focus-visible {
+  background: rgba(255,255,255,.07);
+  color: var(--gold);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -483,6 +519,35 @@ h3 {
     display: none;
   }
 
+  .nav-cta {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block;
+    position: relative;
+    justify-self: end;
+  }
+
+  .mobile-menu summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: var(--control-radius);
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .mobile-menu[open] summary {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
   .hero-grid,
   .trust-grid {
     grid-template-columns: 1fr;
@@ -526,12 +591,6 @@ h3 {
 
   .nav-shell {
     min-height: 68px;
-  }
-
-  .nav-cta {
-    min-height: 40px;
-    padding-inline: 12px;
-    font-size: 12px;
   }
 
   .brand strong {
