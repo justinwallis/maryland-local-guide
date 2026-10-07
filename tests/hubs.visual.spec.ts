@@ -22,7 +22,7 @@ test("Aberdeen community hub renders on phone", async ({ page }) => {
   await page.goto("/maryland/harford-county/aberdeen", { waitUntil: "networkidle" });
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Aberdeen");
-  await expect(page.getByText("Aberdeen, Harford County")).toBeVisible();
+  await expect(page.getByText("Aberdeen, Harford County", { exact: true })).toBeVisible();
   await expect(page.getByText("Useful local paths before endless browsing.")).toBeVisible();
 
   const overflow = await page.evaluate(
