@@ -25,7 +25,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mlg-slice-01-rendered-qa
+          name: mlg-rendered-qa
           path: |
             artifacts/
             playwright-report/
