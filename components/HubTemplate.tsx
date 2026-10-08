@@ -35,7 +35,7 @@ export function HubTemplate({
   communities = [],
 }: HubTemplateProps) {
   return (
-    <main>
+    <main id="main-content">
       <SiteHeader />
 
       <section className="hub-hero">
