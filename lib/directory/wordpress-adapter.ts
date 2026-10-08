@@ -253,7 +253,7 @@ function buildUrl(origin: string, path: string, params?: URLSearchParams): strin
 export function createWordPressDirectoryAdapter(
   options: AdapterOptions = {},
 ): DirectoryReadAdapter {
-  const origin = (options.origin ?? DEFAULT_ORIGIN).replace(/\/$/, "");
+  const origin = (options.origin ?? process.env.MLG_WORDPRESS_ORIGIN ?? DEFAULT_ORIGIN).replace(/\/$/, "");
   const fetchImpl = options.fetchImpl ?? fetch;
 
   async function get(path: string, params?: URLSearchParams) {
@@ -263,6 +263,7 @@ export function createWordPressDirectoryAdapter(
         accept: "application/json",
         "user-agent": "MarylandLocalGuide-Frontend/1.0",
       },
+      signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
       throw new Error(`Directorist read failed (HTTP ${response.status}).`);
