@@ -173,6 +173,7 @@ test("staged WordPress adapter maps canonical search params and service-area tru
   );
   expect(listingsUrl.searchParams.get("directory")).toBe("2");
   expect(listingsUrl.searchParams.get("status")).toBe("publish");
+  expect(listingsUrl.searchParams.get("orderby")).toBe("title");
   expect(listingsUrl.searchParams.get("search")).toBe("masonry");
   expect(listingsUrl.searchParams.get("locations")).toBe("10");
   expect(listingsUrl.searchParams.get("radius")).toBeNull();
