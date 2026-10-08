@@ -1,53 +1,16 @@
 import { notFound } from "next/navigation";
 import { SiteFooter } from "../../../components/SiteFooter";
 import { SiteHeader } from "../../../components/SiteHeader";
+import { getDirectoryReadAdapter } from "../../../lib/directory/provider";
 
 type ListingPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-type RepresentativeListing = {
-  title: string;
-  category: string;
-  locationLabel: string;
-  locationDetail: string;
-  precision: "Service area" | "Exact-location record";
-  description: string;
-  services: string[];
-  serviceArea: string;
-  locationMode: "service-area" | "exact";
-};
-
-const listings: Record<string, RepresentativeListing> = {
-  "service-area-preview": {
-    title: "Representative masonry service",
-    category: "Masonry",
-    locationLabel: "Aberdeen & surrounding Harford County",
-    locationDetail: "Service-area record; no storefront pin should be implied.",
-    precision: "Service area",
-    description:
-      "This representative state demonstrates the approved listing-detail hierarchy without using a real business name, rating, phone number, address, hours, or verification claim.",
-    services: ["Masonry repair", "Brick & block work", "Small project consultation"],
-    serviceArea: "Aberdeen and surrounding Harford County communities",
-    locationMode: "service-area",
-  },
-  "exact-location-preview": {
-    title: "Representative supplier storefront",
-    category: "Supplier",
-    locationLabel: "Public storefront location",
-    locationDetail: "Representative exact-location state — not live directory data.",
-    precision: "Exact-location record",
-    description:
-      "This second representative state proves the exact-location version of the same listing template while keeping all factual business data out of the prototype.",
-    services: ["Building materials", "Project supplies", "Local pickup"],
-    serviceArea: "Public storefront plus the service area supplied by the canonical record",
-    locationMode: "exact",
-  },
-};
-
 export default async function ListingPage({ params }: ListingPageProps) {
   const { slug } = await params;
-  const listing = listings[slug];
+  const directory = getDirectoryReadAdapter();
+  const listing = await directory.getListing(slug);
 
   if (!listing) {
     notFound();
@@ -66,7 +29,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
             <div>
               <div className="listing-meta-row">
                 <span className="result-category">{listing.category}</span>
-                <span className="precision-badge">{listing.precision}</span>
+                <span className="precision-badge">{listing.precisionLabel}</span>
               </div>
               <h1 className="listing-title">{listing.title}</h1>
               <p className="listing-location">{listing.locationLabel}</p>
