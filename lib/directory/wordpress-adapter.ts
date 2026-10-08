@@ -80,6 +80,10 @@ function asNumber(value: unknown): number | null {
   return null;
 }
 
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
 function isMapHidden(value: unknown): boolean {
   return value === true || value === 1 || value === "1" || value === "true";
 }
@@ -92,6 +96,18 @@ function arrayFromPayload<T>(payload: unknown): T[] {
     if (Array.isArray(record[key])) return record[key] as T[];
   }
   return [];
+}
+
+function fieldValue(record: DirectoristListing, key: string): unknown {
+  if (record.fields && Object.hasOwn(record.fields, key)) {
+    return record.fields[key];
+  }
+  return record[key];
+}
+
+function fieldTerms(record: DirectoristListing, key: "categories" | "locations"): Array<number | DirectoristTerm> {
+  const value = fieldValue(record, key);
+  return Array.isArray(value) ? (value as Array<number | DirectoristTerm>) : [];
 }
 
 function termId(term: number | DirectoristTerm): number | null {
@@ -139,22 +155,24 @@ function published(record: DirectoristListing): boolean {
 }
 
 function exactLocation(record: DirectoristListing): boolean {
-  const lat = asNumber(record.latitude);
-  const long = asNumber(record.longitude);
-  const address = plainText(record.address);
-  return !isMapHidden(record.map_hidden) && lat !== null && long !== null && Boolean(address);
+  const lat = asNumber(fieldValue(record, "latitude"));
+  const long = asNumber(fieldValue(record, "longitude"));
+  const address = plainText(asString(fieldValue(record, "address")));
+  return (
+    !isMapHidden(fieldValue(record, "map_hidden")) &&
+    lat !== null &&
+    long !== null &&
+    Boolean(address)
+  );
 }
 
 function customFieldText(record: DirectoristListing, fieldKey: string): string {
-  const direct = record[fieldKey];
-  if (typeof direct === "string") return plainText(direct);
+  const value = fieldValue(record, fieldKey);
+  if (typeof value === "string") return plainText(value);
 
-  const nested = record.fields?.[fieldKey];
-  if (typeof nested === "string") return plainText(nested);
-
-  if (nested && typeof nested === "object") {
-    const value = (nested as Record<string, unknown>).value;
-    if (typeof value === "string") return plainText(value);
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const nested = (value as Record<string, unknown>).value;
+    if (typeof nested === "string") return plainText(nested);
   }
 
   return "";
@@ -164,14 +182,27 @@ function listingCategory(
   record: DirectoristListing,
   categories: ReadonlyMap<number, DirectoristTerm>,
 ): string {
-  return namesForTerms(record.categories, categories)[0] ?? "Local service";
+  return namesForTerms(fieldTerms(record, "categories"), categories)[0] ?? "Local service";
 }
 
 function listingLocations(
   record: DirectoristListing,
   locations: ReadonlyMap<number, DirectoristTerm>,
 ): string[] {
-  return namesForTerms(record.locations, locations);
+  return namesForTerms(fieldTerms(record, "locations"), locations);
+}
+
+function listingTitle(record: DirectoristListing): string {
+  return plainText(asString(fieldValue(record, "title")) || record.name || "");
+}
+
+function listingDescription(record: DirectoristListing): string {
+  return (
+    plainText(asString(fieldValue(record, "description"))) ||
+    plainText(record.description) ||
+    plainText(record.short_description) ||
+    ""
+  );
 }
 
 function toSummary(
@@ -180,13 +211,14 @@ function toSummary(
   locations: ReadonlyMap<number, DirectoristTerm>,
 ): DirectoryListingSummary | null {
   if (!published(record)) return null;
+
   const slug = record.slug?.trim();
-  const title = plainText(record.name);
+  const title = listingTitle(record);
   if (!slug || !title) return null;
 
   const locNames = listingLocations(record, locations);
   const exact = exactLocation(record);
-  const address = plainText(record.address);
+  const address = plainText(asString(fieldValue(record, "address")));
   const locationLabel = exact
     ? address
     : locNames.length
@@ -196,7 +228,7 @@ function toSummary(
   const summarySource =
     plainText(record.short_description) ||
     plainText(record.tagline) ||
-    plainText(record.description) ||
+    listingDescription(record) ||
     "Local directory listing.";
 
   return {
@@ -223,23 +255,21 @@ function toDetail(
 
   const locNames = listingLocations(record, locations);
   const exact = exactLocation(record);
-  const address = plainText(record.address);
+  const address = plainText(asString(fieldValue(record, "address")));
   const servicesOffered = customFieldText(record, "custom-textarea");
   const serviceAreaText = customFieldText(record, "custom-textarea-2");
 
   return {
     ...summary,
-    description:
-      plainText(record.description) ||
-      plainText(record.short_description) ||
-      "No public description is available yet.",
+    description: listingDescription(record) || "No public description is available yet.",
     services: servicesOffered
       ? servicesOffered
           .split(/\r?\n|;|•/)
           .map((item) => item.trim())
           .filter(Boolean)
       : [],
-    serviceArea: serviceAreaText ||
+    serviceArea:
+      serviceAreaText ||
       (exact
         ? locNames.join(", ") || "See the canonical listing for current service-area information."
         : locNames.join(", ") || "Harford County"),
@@ -303,14 +333,14 @@ export function createWordPressDirectoryAdapter(
   async function taxonomyContext() {
     const [directoriesResponse, categoriesResponse, locationsResponse] = await Promise.all([
       get("/wp-json/directorist/v1/directories"),
-      get("/wp-json/directorist/v1/listings/categories", new URLSearchParams({
-        per_page: "100",
-        hide_empty: "false",
-      })),
-      get("/wp-json/directorist/v1/listings/locations", new URLSearchParams({
-        per_page: "100",
-        hide_empty: "false",
-      })),
+      get(
+        "/wp-json/directorist/v1/listings/categories",
+        new URLSearchParams({ per_page: "100", hide_empty: "false" }),
+      ),
+      get(
+        "/wp-json/directorist/v1/listings/locations",
+        new URLSearchParams({ per_page: "100", hide_empty: "false" }),
+      ),
     ]);
 
     const directories = arrayFromPayload<DirectoristDirectory>(directoriesResponse.payload);
@@ -369,7 +399,7 @@ export function createWordPressDirectoryAdapter(
         params.set("locations", String(location.id));
       }
 
-      const result = await get("/wp-json/directorist/v1/listings", params);
+      const result = await get("/wp-json/directorist/v2/listings", params);
       const records = arrayFromPayload<DirectoristListing>(result.payload);
       const items = records
         .map((record) => toSummary(record, context.categoryMap, context.locationMap))
@@ -396,7 +426,7 @@ export function createWordPressDirectoryAdapter(
         per_page: "1",
       });
 
-      const result = await get("/wp-json/directorist/v1/listings", params);
+      const result = await get("/wp-json/directorist/v2/listings", params);
       const record = arrayFromPayload<DirectoristListing>(result.payload)[0];
       if (!record) return null;
 
