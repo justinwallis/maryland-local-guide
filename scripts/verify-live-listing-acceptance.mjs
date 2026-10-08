@@ -141,7 +141,7 @@ try {
   }
 
   const published = await get(
-    `/wp-json/directorist/v1/listings?slug=${encodeURIComponent(publishedSlug)}&status=publish&per_page=1`,
+    `/wp-json/directorist/v2/listings?slug=${encodeURIComponent(publishedSlug)}&status=publish&per_page=1`,
   );
   const publishedRecord = arr(published.json)[0] ?? null;
 
@@ -150,11 +150,15 @@ try {
   }
 
   const status = String(publishedRecord.status ?? "").toLowerCase();
+  const fields =
+    publishedRecord.fields && typeof publishedRecord.fields === "object"
+      ? publishedRecord.fields
+      : {};
   const exactSignals = {
-    mapHidden: mapHidden(publishedRecord.map_hidden),
-    addressPresent: hasText(publishedRecord.address),
-    latitudePresent: numeric(publishedRecord.latitude),
-    longitudePresent: numeric(publishedRecord.longitude),
+    mapHidden: mapHidden(fields.map_hidden),
+    addressPresent: hasText(fields.address),
+    latitudePresent: numeric(fields.latitude),
+    longitudePresent: numeric(fields.longitude),
   };
   const inferredExact =
     !exactSignals.mapHidden &&
@@ -172,39 +176,48 @@ try {
     status,
     idPresent: typeof publishedRecord.id === "number",
     slugMatches: publishedRecord.slug === publishedSlug,
-    categoryMatches: containsTerm(publishedRecord.categories, categoryId),
-    locationMatches: containsTerm(publishedRecord.locations, locationId),
+    categoryMatches: containsTerm(fields.categories, categoryId),
+    locationMatches: containsTerm(fields.locations, locationId),
     servicesOfferedFieldPresent: customServicesPresent,
     serviceAreaFieldPresent: customAreaPresent,
     exactLocationSignals: exactSignals,
     inferredLocationMode: inferredExact ? "exact" : "service-area",
   };
 
-  const pendingDefault = await get(
-    `/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&per_page=1`,
-  );
-  const pendingExplicit = await get(
-    `/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&status=pending&per_page=1`,
-  );
-  const pendingEdit = await get(
-    `/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&context=edit&per_page=1`,
-  );
+  const [pendingDefaultV1, pendingExplicitV1, pendingEditV1, pendingDefaultV2, pendingExplicitV2, pendingEditV2] = await Promise.all([
+    get(`/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&per_page=1`),
+    get(`/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&status=pending&per_page=1`),
+    get(`/wp-json/directorist/v1/listings?slug=${encodeURIComponent(pendingSlug)}&context=edit&per_page=1`),
+    get(`/wp-json/directorist/v2/listings?slug=${encodeURIComponent(pendingSlug)}&per_page=1`),
+    get(`/wp-json/directorist/v2/listings?slug=${encodeURIComponent(pendingSlug)}&status=pending&per_page=1`),
+    get(`/wp-json/directorist/v2/listings?slug=${encodeURIComponent(pendingSlug)}&context=edit&per_page=1`),
+  ]);
 
   report.checks.unpublishedBoundary = {
-    defaultQueryCount: arr(pendingDefault.json).length,
-    explicitPendingQueryCount: arr(pendingExplicit.json).length,
-    editContextQueryCount: arr(pendingEdit.json).length,
-    defaultHttpStatus: pendingDefault.status,
-    pendingHttpStatus: pendingExplicit.status,
-    editHttpStatus: pendingEdit.status,
+    v1: {
+      defaultQueryCount: arr(pendingDefaultV1.json).length,
+      explicitPendingQueryCount: arr(pendingExplicitV1.json).length,
+      editContextQueryCount: arr(pendingEditV1.json).length,
+      defaultHttpStatus: pendingDefaultV1.status,
+      pendingHttpStatus: pendingExplicitV1.status,
+      editHttpStatus: pendingEditV1.status,
+    },
+    v2: {
+      defaultQueryCount: arr(pendingDefaultV2.json).length,
+      explicitPendingQueryCount: arr(pendingExplicitV2.json).length,
+      editContextQueryCount: arr(pendingEditV2.json).length,
+      defaultHttpStatus: pendingDefaultV2.status,
+      pendingHttpStatus: pendingExplicitV2.status,
+      editHttpStatus: pendingEditV2.status,
+    },
   };
 
   const failures = [];
 
   if (status !== "publish" && status !== "published") failures.push("published listing status");
   if (publishedRecord.slug !== publishedSlug) failures.push("published listing slug");
-  if (!containsTerm(publishedRecord.categories, categoryId)) failures.push("category mapping");
-  if (!containsTerm(publishedRecord.locations, locationId)) failures.push("location mapping");
+  if (!containsTerm(fields.categories, categoryId)) failures.push("category mapping");
+  if (!containsTerm(fields.locations, locationId)) failures.push("location mapping");
   if (!customServicesPresent) failures.push("Services Offered custom field");
   if (!customAreaPresent) failures.push("Service Area custom field");
 
@@ -216,9 +229,12 @@ try {
   }
 
   if (
-    arr(pendingDefault.json).length > 0 ||
-    arr(pendingExplicit.json).length > 0 ||
-    arr(pendingEdit.json).length > 0
+    arr(pendingDefaultV1.json).length > 0 ||
+    arr(pendingExplicitV1.json).length > 0 ||
+    arr(pendingEditV1.json).length > 0 ||
+    arr(pendingDefaultV2.json).length > 0 ||
+    arr(pendingExplicitV2.json).length > 0 ||
+    arr(pendingEditV2.json).length > 0
   ) {
     failures.push("unpublished listing boundary");
   }
