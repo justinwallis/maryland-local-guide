@@ -69,26 +69,27 @@ function createMockFetch() {
       ]);
     }
 
-    if (url.pathname === "/wp-json/directorist/v1/listings") {
+    if (url.pathname === "/wp-json/directorist/v2/listings") {
       if (url.searchParams.get("slug") === "exact-shop") {
         return response(
           [
             {
               id: 102,
               slug: "exact-shop",
-              name: "Example Supply",
               status: "publish",
               permalink: "https://marylandlocalguide.com/listing/example-supply/",
-              categories: [19],
-              locations: [10],
-              description: "<p>Public exact-location listing.</p>",
-              short_description: "Local materials and pickup.",
-              "custom-textarea": "Building materials; Local pickup",
-              "custom-textarea-2": "Aberdeen and nearby Harford County",
-              address: "100 Example Street, Aberdeen, MD",
-              latitude: "39.5000",
-              longitude: "-76.1600",
-              map_hidden: false,
+              fields: {
+                title: "Example Supply",
+                description: "<p>Public exact-location listing.</p>",
+                categories: [{ id: 19, name: "Masonry", slug: "masonry" }],
+                locations: [{ id: 10, name: "Aberdeen", slug: "aberdeen" }],
+                "custom-textarea": "Building materials; Local pickup",
+                "custom-textarea-2": "Aberdeen and nearby Harford County",
+                address: "100 Example Street, Aberdeen, MD",
+                latitude: "39.5000",
+                longitude: "-76.1600",
+                map_hidden: false,
+              },
             },
           ],
           { "x-wp-total": "1", "x-wp-totalpages": "1" },
@@ -101,10 +102,12 @@ function createMockFetch() {
             {
               id: 103,
               slug: "pending-fixture",
-              name: "Pending Fixture",
               status: "pending",
-              categories: [19],
-              locations: [10],
+              fields: {
+                title: "Pending Fixture",
+                categories: [{ id: 19, name: "Masonry", slug: "masonry" }],
+                locations: [{ id: 10, name: "Aberdeen", slug: "aberdeen" }],
+              },
             },
           ],
           { "x-wp-total": "1", "x-wp-totalpages": "1" },
@@ -116,15 +119,17 @@ function createMockFetch() {
           {
             id: 101,
             slug: "service-area-business",
-            name: "Example Masonry",
             status: "publish",
-            categories: [19],
-            locations: [10],
-            short_description: "Brick and block work across the local service area.",
-            address: "Private service address",
-            latitude: "39.5000",
-            longitude: "-76.1600",
-            map_hidden: true,
+            fields: {
+              title: "Example Masonry",
+              description: "Brick and block work across the local service area.",
+              categories: [{ id: 19, name: "Masonry", slug: "masonry" }],
+              locations: [{ id: 10, name: "Aberdeen", slug: "aberdeen" }],
+              address: "Private service address",
+              latitude: "39.5000",
+              longitude: "-76.1600",
+              map_hidden: true,
+            },
           },
         ],
         { "x-wp-total": "1", "x-wp-totalpages": "1" },
@@ -164,7 +169,7 @@ test("staged WordPress adapter maps canonical search params and service-area tru
   });
 
   const listingsUrl = new URL(
-    mock.seen.find((url) => url.includes("/wp-json/directorist/v1/listings?"))!,
+    mock.seen.find((url) => url.includes("/wp-json/directorist/v2/listings?"))!,
   );
   expect(listingsUrl.searchParams.get("directory")).toBe("2");
   expect(listingsUrl.searchParams.get("status")).toBe("publish");
