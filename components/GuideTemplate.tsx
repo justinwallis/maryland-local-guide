@@ -36,7 +36,7 @@ export function GuideTemplate({
   toolItems = [],
 }: GuideTemplateProps) {
   return (
-    <main>
+    <main id="main-content">
       <SiteHeader />
 
       <section className="guide-hero">
