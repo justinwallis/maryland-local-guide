@@ -1,14 +1,1 @@
-import type { DirectoryReadAdapter } from "./types";
-import { representativeDirectoryAdapter } from "./representative-adapter";
-
-export function getDirectoryReadAdapter(): DirectoryReadAdapter {
-  const source = process.env.MLG_DIRECTORY_SOURCE ?? "representative";
-
-  if (source !== "representative") {
-    throw new Error(
-      "Live directory data is not enabled. The WordPress/Directorist read contract must be verified before MLG_DIRECTORY_SOURCE can select a live adapter.",
-    );
-  }
-
-  return representativeDirectoryAdapter;
-}
+import type { DirectoryReadAdapter } from "./types";\nimport { representativeDirectoryAdapter } from "./representative-adapter";\nimport { wordpressDirectoryAdapter } from "./wordpress-adapter";\n\nexport function getDirectoryReadAdapter(): DirectoryReadAdapter {\n  const source = process.env.MLG_DIRECTORY_SOURCE ?? "representative";\n\n  if (source === "representative") {\n    return representativeDirectoryAdapter;\n  }\n\n  if (source === "wordpress") {\n    if (process.env.MLG_LIVE_DIRECTORY_ACCEPTED !== "true") {\n      throw new Error(\n        "The WordPress directory adapter is staged but not accepted for live use. Keep the representative provider until a controlled published listing passes the live mapping and location-semantics gate.",\n      );\n    }\n    return wordpressDirectoryAdapter;\n  }\n\n  throw new Error("Unsupported MLG_DIRECTORY_SOURCE: " + source);\n}\n
