@@ -1,14 +1,12 @@
+import { BrandLogo } from "./BrandLogo";
+
 export function SiteFooter() {
   return (
     <footer className="footer" id="business">
       <div className="shell footer-grid">
         <div>
           <a className="brand brand-footer" href="/" aria-label="Maryland Local Guide home">
-            <span className="brand-mark" aria-hidden="true">MD</span>
-            <span>
-              <strong>Maryland</strong>
-              <em>Local Guide</em>
-            </span>
+            <BrandLogo className="brand-picture-footer" />
           </a>
           <p className="footer-copy">
             Harford County first. Built to make local discovery more useful.
