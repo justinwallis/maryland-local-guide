@@ -9,7 +9,7 @@ test("home project guide renders cleanly on desktop", async ({ page }) => {
   );
   await expect(page.getByText("What to know first")).toBeVisible();
   await expect(page.getByText("Project-call preparation checklist")).toBeVisible();
-  await expect(page.getByText("Harford County first.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Harford County first." })).toBeVisible();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
