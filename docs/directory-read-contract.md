@@ -1,39 +1,64 @@
-# Directory Read Contract — Preflight
+# Directory Read Contract — Live Read Preflight
 
-Status: **PUBLIC TRANSPORT VERIFIED / LIVE LISTING PAYLOAD NOT YET AVAILABLE**
+Status: **PUBLIC REST CONTRACT VERIFIED / LIVE LISTING PAYLOAD STILL UNAVAILABLE**
 
-WordPress + Directorist remain authoritative for live directory data and search behavior. The modern frontend must not become a second source of listing truth.
+The public frontend must not create a second source of listing truth. WordPress + Directorist remain authoritative for live directory data and search behavior.
 
-## Verified live on marylandlocalguide.com
+## Verified from marylandlocalguide.com — 2026-10-07
 
-Read-only public probing from GitHub Actions succeeded on 2026-10-08 UTC. No authentication, write request, user endpoint, or raw pending/draft listing value was used.
+A bounded unauthenticated GET/OPTIONS probe ran from GitHub Actions against the public site. It used no admin session, sent no write method, queried no user endpoint, and stored no raw listing values.
 
-- `/wp-json/` returns HTTP 200 JSON.
-- Advertised namespaces include `directorist/v1`, `directorist/v2`, and `wp/v2`.
-- The WordPress listing post type is `at_biz_dir`.
-- Directorist publicly advertises GET collection/single-listing routes in both v1 and v2.
-- Both v1 and v2 listing collections currently return HTTP 200 with **0 published listings**.
-- Public Directorist taxonomy reads are available even while listing counts are zero.
-- The public category set currently contains 31 configured terms.
-- The public location set currently contains 16 configured terms.
+### REST availability
 
-### Directory types
+- `/wp-json/` → HTTP 200
+- WordPress namespace: `wp/v2`
+- Directorist namespaces: `directorist/v1`, `directorist/v2`, `directorist`
+- Directorist public listing collections:
+  - `GET /wp-json/directorist/v1/listings`
+  - `GET /wp-json/directorist/v2/listings`
+- Both listing collections currently return HTTP 200 with **0 public listings**.
 
-The public Directorist directory registry currently exposes:
+### Canonical directory types
 
-| ID | Slug | Name | Default | Public count |
-| --- | --- | --- | --- | ---: |
-| 2 | `home-services` | Home Services | yes | 0 |
-| 3 | `suppliers` | Suppliers | no | 0 |
-| 4 | `equipment-rental` | Equipment & Rental | no | 0 |
-| 5 | `places` | Places | no | 0 |
-| 6 | `events` | Events | no | 0 |
+The public Directorist directories endpoint currently exposes:
 
-Current directory create/edit status values are `pending`. That is configuration evidence, not proof that unauthenticated clients can read pending listings.
+| ID | Slug | Name | Default | Public Count | New/Edit Status |
+| --- | --- | --- | --- | ---: | --- |
+| 2 | `home-services` | Home Services | yes | 0 | pending / pending |
+| 3 | `suppliers` | Suppliers | no | 0 | pending / pending |
+| 4 | `equipment-rental` | Equipment & Rental | no | 0 | pending / pending |
+| 5 | `places` | Places | no | 0 | pending / pending |
+| 6 | `events` | Events | no | 0 | pending / pending |
 
-### Location hierarchy
+This matches the intended Harford MVP information architecture.
 
-The configured public hierarchy is:
+### Public taxonomy contract
+
+`GET /directorist/v1/listings/categories` currently exposes **31 categories**.
+
+Examples relevant to the launch wedge:
+
+- Masonry — ID 19 — Home Services
+- Landscaping — ID 20 — Home Services
+- Plumbing — ID 21 — Home Services
+- Electrical — ID 22 — Home Services
+- Roofing — ID 23 — Home Services
+- HVAC — ID 24 — Home Services
+- Water & Well — ID 25 — Home Services
+- Septic — ID 26 — Home Services
+- Tree Service — ID 27 — Home Services
+- Fencing — ID 28 — Home Services
+- Concrete — ID 29 — Home Services
+- Excavation — ID 30 — Home Services
+- Drainage — ID 31 — Home Services
+- Painting — ID 32 — Home Services
+- Cleaning — ID 33 — Home Services
+- Handyman — ID 34 — Home Services
+- General Contractor & Remodeling — ID 54 — Home Services
+
+`GET /directorist/v1/listings/locations` currently exposes **16 location terms**.
+
+The verified launch hierarchy includes:
 
 - Maryland — ID 8
   - Harford County — ID 9
@@ -52,106 +77,85 @@ The configured public hierarchy is:
     - Churchville — ID 52
     - Monkton — ID 53
 
-All five directory types currently reference the same configured location hierarchy.
+### Listing search/filter contract
 
-### Category mapping
-
-Configured category terms are already mapped to directory IDs. Examples verified live:
-
-- Home Services (directory 2): Masonry, Landscaping, Plumbing, Electrical, Roofing, HVAC, Water & Well, Septic, Tree Service, Fencing, Concrete, Excavation, Drainage, Painting, Cleaning, Handyman, General Contractor & Remodeling.
-- Suppliers (directory 3): Building & Lumber Supply, Landscape & Masonry Supply, Nurseries & Garden Centers, Stone/Mulch/Topsoil.
-- Equipment & Rental (directory 4): Tool Rental, Heavy Equipment Rental, Dumpster Rental, Trailer Rental.
-- Places (directory 5): Parks & Trails, Attractions & Museums, Public & Community Resources.
-- Events (directory 6): Community Events, Markets & Festivals, Classes & Workshops.
-
-Do not duplicate these mappings in a second CMS. Runtime adapters should resolve canonical Directorist terms by stable slug/ID and preserve their directory relationship.
-
-## Verified listing collection contract
-
-Unauthenticated `OPTIONS` on both v1 and v2 listing collections returns HTTP 200.
-
-The public GET collections advertise these filter arguments:
+OPTIONS for the v1 listing collection verifies public GET arguments including:
 
 - `search`
 - `directory`
 - `categories`
 - `locations`
-- `tags`
+- `page`
+- `per_page`
+- `offset`
+- `order`
+- `orderby`
+- `status`
 - `slug`
 - `include` / `exclude`
-- `author`
 - `featured`
-- `min_price` / `max_price` / `price_range`
+- `tags`
 - `rating`
 - `radius`
+- price-related filters
+
+The frontend should initially map only the already-approved subset: keyword, directory, category, location/community, page/per-page. Radius remains disabled until location semantics are proven with real records.
+
+### v1 listing schema fields
+
+The advertised v1 schema includes fields needed for the eventual adapter, including:
+
+- `id`, `slug`, `name`, `permalink`
+- `directory`
+- `categories`, `locations`, `tags`
+- `description`, `short_description`, `tagline`
+- `address`, `zip`
+- `latitude`, `longitude`
+- `map_hidden`
+- `website`, `phone`, `phone_2`, `email`, `fax`
+- `images`
 - `status`
-- `page` / `per_page` / `offset`
-- `order` / `orderby`
-- `context`
+- `date_created`, `date_modified`
+- `average_rating`, `rating_count`, `reviews_allowed`
+- `featured`, `popular`, `views_count`
 
-The existence of `radius` in the API is **not** permission to expose distance/radius in the launch UI. The canonical MLG roadmap still requires truthful location semantics first.
+The UI is **not** required to render most of these. Unsupported or unverified fields should remain omitted.
 
-### v1 listing schema
+## Current visibility-boundary observation
 
-The live v1 collection schema advertises fields including:
+Unauthenticated probes for `status=pending`, `status=draft`, and `context=edit` returned HTTP 200 with zero records. No unpublished data was observed or stored.
 
-`id`, `name`, `slug`, `status`, `directory`, `description`, `short_description`, `categories`, `locations`, `address`, `latitude`, `longitude`, `map_hidden`, `phone`, `phone_2`, `website`, `email`, `images`, `social_links`, `tagline`, `tags`, `featured`, `average_rating`, `rating_count`, `reviews_allowed`, dates, pricing fields, and provenance-adjacent counters.
+This is **not yet proof** of permission behavior when unpublished records exist. Do not rely on it as an authorization guarantee.
 
-This makes v1 the clearer candidate for the first read adapter because the public schema exposes the listing fields directly.
+## What remains unverified
 
-### v2 listing schema
+Because the public listing count is currently zero, we still cannot verify against a real published record:
 
-The live v2 collection exists and returns HTTP 200. Its schema is more normalized and exposes a generic `fields` payload plus core fields such as `id`, `slug`, `status`, `directory`, `permalink`, timestamps, rating counters, `timezone`, and related IDs.
+1. exact live item response shape and field population;
+2. whether Home Services single-listing custom fields map directly into v1 properties or require v2 `fields`;
+3. service-area versus storefront behavior using `map_hidden`, locations, address and coordinates;
+4. keyword/category/location filter semantics against actual published listings;
+5. pagination behavior beyond the zero-result state;
+6. public-detail lookup by ID/slug against a real record;
+7. server-rendered cache/freshness behavior against changing live data.
 
-Do not choose v2 solely because it is newer. Choose the minimum contract that can be mapped and verified against actual MLG listing data.
+## Frontend adapter rule
 
-## Unauthenticated boundary check
+A live adapter may now be **implemented and tested behind the existing fail-closed provider switch**, because the public endpoint names, search arguments, taxonomy IDs/slugs, directory IDs/slugs and advertised schema are verified.
 
-The probe requested counts/status only for:
-
-- v1 `status=pending`
-- v1 `status=draft`
-- v1 `context=edit`
-- v2 `status=pending`
-
-All returned HTTP 200 with total 0/body count 0. No pending/draft/edit record values were captured.
-
-Because the site currently exposes zero listings, this result does **not** prove that future pending/draft records are safely blocked. Re-run this boundary check after a controlled non-public test record exists, and fail closed if unauthenticated reads expose it.
-
-## Frontend contract already verified
-
-- Search/results and listing-detail pages consume one `DirectoryReadAdapter` seam.
-- Representative data is centralized and explicitly marked non-live.
-- Any attempt to select a non-representative provider fails closed.
-- Service-area and exact-location UI states are separate.
-- The UI does not require ratings, prices, hours, coordinates, verification, or availability.
-
-## Remaining live proof before enabling a real adapter
-
-The public transport layer itself is no longer the blocker. The missing proof is a **real, controlled listing payload**.
-
-Before enabling a live adapter:
-
-1. Inspect one controlled Home Services listing through WPVibe/admin read access after capacity returns, or create/use an already-authorized non-public test fixture.
-2. Verify the actual value shape for Description, Services Offered, Service Area, category, location, public URL, and supported contact actions.
-3. Verify how `map_hidden`, `latitude`, `longitude`, address and location terms distinguish an exact storefront from a service-area business.
-4. Verify that default unauthenticated collection reads include only publish-safe records.
-5. Re-run the pending/draft/edit boundary check while a controlled non-public record actually exists.
-6. Verify keyword/category/community pagination behavior with at least one publish-safe listing before replacing representative Search/Listing fixtures.
+It must **not become the default provider** until at least one safe published listing exists and the mapping/location semantics pass read-only acceptance.
 
 ## Stop conditions
 
-Do not enable live frontend data if:
+Do not enable live data if the adapter:
 
-- unauthenticated reads expose draft/pending/private records;
-- service-area records can be mistaken for exact storefront coordinates;
-- the adapter would change Directorist search semantics;
-- a required field depends on private/admin-only data;
-- the mapping requires fabricated ratings, addresses, coordinates, hours, verification, or availability;
-- the frontend would become a second listing source of truth.
+- exposes draft/Pending/private records;
+- treats service-area businesses as exact storefront pins;
+- changes Directorist search semantics;
+- requires private/admin fields for public rendering;
+- fabricates missing address, rating, availability, verification or contact state;
+- bypasses the canonical moderation/provenance boundary.
 
-## Reusable probe
+## Repeatable evidence
 
-`scripts/probe-directorist-read.mjs` performs the bounded public REST preflight. The companion GitHub Actions workflow is manual-only after this verification pass. It uses GET/OPTIONS only and intentionally avoids user endpoints and raw pending/draft record output.
-
-The frontend remains `noindex` and representative-only until the later explicit launch/data gate.
+The repository includes `scripts/probe-directorist-read.mjs` and the `Directorist Read Preflight` GitHub Actions workflow so this read-only contract can be rechecked after WordPress/Directorist changes.
