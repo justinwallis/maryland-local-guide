@@ -3,7 +3,7 @@ import { SiteHeader } from "./SiteHeader";
 
 type GuideSection = {
   heading: string;
-  body: string[];
+  body: readonly string[];
 };
 
 type GuideTemplateProps = {
@@ -13,12 +13,12 @@ type GuideTemplateProps = {
   areaLabel: string;
   updatedLabel: string;
   readingTime: string;
-  takeaways: string[];
-  sections: GuideSection[];
-  relatedServices: string[];
+  takeaways: readonly string[];
+  sections: readonly GuideSection[];
+  relatedServices: readonly string[];
   toolTitle?: string;
   toolIntro?: string;
-  toolItems?: string[];
+  toolItems?: readonly string[];
 };
 
 export function GuideTemplate({
