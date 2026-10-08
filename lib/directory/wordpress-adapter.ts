@@ -379,7 +379,7 @@ export function createWordPressDirectoryAdapter(
         page: String(positiveInteger(input.page, 1, 10_000)),
         per_page: String(positiveInteger(input.perPage, 12, 50)),
         order: "asc",
-        orderby: "name",
+        orderby: "title",
       });
 
       if (input.query?.trim()) params.set("search", input.query.trim());
