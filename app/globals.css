@@ -69,17 +69,19 @@ select {
 .brand {
   display: inline-flex;
   align-items: center;
-  min-width: max-content;
+  min-width: 0;
 }
 
 .brand-picture {
   display: block;
+  max-width: 100%;
   line-height: 0;
 }
 
 .brand-logo {
   display: block;
   width: 228px;
+  max-width: 100%;
   height: auto;
 }
 
