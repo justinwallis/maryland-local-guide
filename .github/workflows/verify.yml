@@ -19,6 +19,8 @@ jobs:
           node-version: 24
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
+      - name: Check repository scripts
+        run: node --check scripts/*.mjs
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run qa:visual
