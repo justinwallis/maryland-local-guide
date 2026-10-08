@@ -144,16 +144,17 @@ export function HubTemplate({
         </div>
 
         <div className="hub-editorial-grid">
-          <article className="hub-editorial-card">
+          <a className="hub-editorial-card" href="/guides/planning-a-home-project">
             <div className="hub-editorial-art" aria-hidden="true">Guide image area</div>
             <div>
               <p className="card-kicker">Representative guide module</p>
-              <h3>Practical local guide</h3>
+              <h3>Plan a home project</h3>
               <p>
-                Slice 05 will turn this pattern into the reusable guide/tool template.
+                A reusable long-form guide and practical checklist using the approved editorial system.
               </p>
+              <span className="text-link">Read the guide →</span>
             </div>
-          </article>
+          </a>
 
           <article className="hub-editorial-card">
             <div className="hub-editorial-art" aria-hidden="true">Place image area</div>
