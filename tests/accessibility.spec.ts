@@ -15,7 +15,7 @@ for (const route of routes) {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(route, { waitUntil: "networkidle" });
 
-    const results = await new AxeBuilder({ page })
+    const results = await new AxeBuilder({ page: page as any })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
 
