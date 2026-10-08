@@ -1,0 +1,61 @@
+name: Live Listing Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      published_slug:
+        description: Controlled temporary published Home Services listing slug
+        required: true
+        type: string
+      pending_slug:
+        description: Controlled Pending/Draft companion listing slug
+        required: true
+        type: string
+      category_slug:
+        description: Expected Directorist category slug
+        required: true
+        default: masonry
+        type: string
+      location_slug:
+        description: Expected Directorist location slug
+        required: true
+        default: aberdeen
+        type: string
+      location_mode:
+        description: Expected public location treatment
+        required: true
+        default: service-area
+        type: choice
+        options:
+          - service-area
+          - exact
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify controlled live listing and unpublished boundary
+        env:
+          MLG_SITE_ORIGIN: https://marylandlocalguide.com
+          MLG_ACCEPT_PUBLISHED_SLUG: ${{ inputs.published_slug }}
+          MLG_ACCEPT_PENDING_SLUG: ${{ inputs.pending_slug }}
+          MLG_ACCEPT_CATEGORY_SLUG: ${{ inputs.category_slug }}
+          MLG_ACCEPT_LOCATION_SLUG: ${{ inputs.location_slug }}
+          MLG_ACCEPT_LOCATION_MODE: ${{ inputs.location_mode }}
+        run: node scripts/verify-live-listing-acceptance.mjs
+      - name: Upload bounded acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-listing-acceptance
+          path: artifacts/live-listing-acceptance.json
+          if-no-files-found: error
+          retention-days: 7
