@@ -8,7 +8,7 @@ test("live Directorist search renders the controlled Home Services record", asyn
   await expect(page.getByText("MLG QA Live Acceptance Published")).toBeVisible();
   await expect(page.getByText("Preview listing — not live directory data.")).toHaveCount(0);
   await expect(page.getByText("Service area", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Aberdeen", { exact: true }).first()).toBeVisible();
+  await expect(page.locator(".result-location", { hasText: "Aberdeen" })).toBeVisible();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
