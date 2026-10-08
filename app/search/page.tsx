@@ -50,7 +50,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const emptyPreview = params.mode === "empty";
 
   return (
-    <main>
+    <main id="main-content">
       <SiteHeader />
 
       <section className="results-hero">

@@ -39,7 +39,7 @@ const projectSteps = [
 
 export default function Home() {
   return (
-    <main>
+    <main id="main-content">
       <SiteHeader />
 
       <section className="hero">

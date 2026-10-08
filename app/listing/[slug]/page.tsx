@@ -56,7 +56,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const isExact = listing.locationMode === "exact";
 
   return (
-    <main>
+    <main id="main-content">
       <SiteHeader />
 
       <section className="listing-hero">

@@ -1,6 +1,8 @@
 export function SiteHeader() {
   return (
-    <header className="site-header">
+    <>
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <header className="site-header">
       <div className="shell nav-shell">
         <a className="brand" href="/" aria-label="Maryland Local Guide home">
           <span className="brand-mark" aria-hidden="true">MD</span>
@@ -32,6 +34,7 @@ export function SiteHeader() {
           </nav>
         </details>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
