@@ -498,6 +498,21 @@ h3 {
   color: var(--gold);
 }
 
+.footer-status {
+  margin: 8px 0;
+  color: rgba(255,255,255,.76);
+  font-size: 14px;
+}
+
+.footer-status span {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255,255,255,.48);
+  font-size: 11px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 960px) {
   .nav-shell {
     grid-template-columns: 1fr auto;
