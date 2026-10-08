@@ -35,6 +35,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     query,
     community: communityKey,
   });
+  const isRepresentative = resultSet.source === "representative";
 
   return (
     <>
@@ -52,7 +53,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 </h1>
                 <p>Browse local service options for {community}.</p>
               </div>
-              <span className="preview-badge">Preview data</span>
+              {isRepresentative ? <span className="preview-badge">Preview data</span> : null}
             </div>
 
             <form className="search-panel results-search" action="/search" method="get" role="search">
@@ -153,7 +154,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       <h3>{result.title}</h3>
                       <p className="result-location">{result.locationLabel}</p>
                       <p>{result.summary}</p>
-                      <p className="representative-note">Preview listing — not live directory data.</p>
+                      {result.representative ? (
+                        <p className="representative-note">Preview listing — not live directory data.</p>
+                      ) : null}
                       <div className="result-actions">
                         <a className="button button-gold" href={`/listing/${result.slug}`}>View details</a>
                       </div>
@@ -182,8 +185,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         <section className="results-trust">
           <div className="shell results-trust-row">
             <p>
-              This prelaunch preview uses sample listings. Live business names, locations, hours,
-              actions, and availability will come only from verified directory data.
+              {isRepresentative
+                ? "This prelaunch preview uses sample listings. Live business names, locations, hours, actions, and availability will come only from verified directory data."
+                : "Results are read from the canonical WordPress/Directorist directory. Contact actions, ratings, hours, and map precision remain limited to fields that pass the separate launch and provenance gates."}
             </p>
             <a className="text-link" href="/maryland/harford-county">
               Explore Harford County →
