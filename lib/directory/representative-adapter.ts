@@ -15,6 +15,7 @@ const searchItems: readonly DirectoryListingSummary[] = [
     precisionLabel: "Service area",
     summary: "Representative result-card state for a local masonry service.",
     representative: true,
+    source: "representative",
   },
   {
     slug: "service-area-preview",
@@ -24,6 +25,7 @@ const searchItems: readonly DirectoryListingSummary[] = [
     precisionLabel: "Service area",
     summary: "Representative result-card state for well and water service.",
     representative: true,
+    source: "representative",
   },
   {
     slug: "service-area-preview",
@@ -33,6 +35,7 @@ const searchItems: readonly DirectoryListingSummary[] = [
     precisionLabel: "Service area",
     summary: "Representative result-card state for local tree service.",
     representative: true,
+    source: "representative",
   },
 ];
 
@@ -45,6 +48,7 @@ const details: Record<string, DirectoryListingDetail> = {
     precisionLabel: "Service area",
     summary: "Representative service-area listing detail.",
     representative: true,
+    source: "representative",
     locationDetail: "Service-area record; no storefront pin should be implied.",
     description:
       "This representative state demonstrates the approved listing-detail hierarchy without using a real business name, rating, phone number, address, hours, or verification claim.",
@@ -60,6 +64,7 @@ const details: Record<string, DirectoryListingDetail> = {
     precisionLabel: "Exact-location record",
     summary: "Representative exact-location listing detail.",
     representative: true,
+    source: "representative",
     locationDetail: "Representative exact-location state — not live directory data.",
     description:
       "This second representative state proves the exact-location version of the same listing template while keeping all factual business data out of the prototype.",
