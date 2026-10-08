@@ -11,9 +11,7 @@ function typeOf(value) {
 
 function shape(value, depth = 2) {
   if (depth < 0) return typeOf(value);
-  if (Array.isArray(value)) {
-    return value.length ? [shape(value[0], depth - 1)] : [];
-  }
+  if (Array.isArray(value)) return value.length ? [shape(value[0], depth - 1)] : [];
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value)
@@ -38,6 +36,15 @@ function routeArgs(routeInfo) {
   return [...names].sort();
 }
 
+function firstRecord(json) {
+  if (Array.isArray(json)) return json[0] ?? null;
+  if (!json || typeof json !== "object") return null;
+  for (const key of ["data", "listings", "items", "results"]) {
+    if (Array.isArray(json[key])) return json[key][0] ?? null;
+  }
+  return null;
+}
+
 function mapSignals(item) {
   if (!item || typeof item !== "object" || Array.isArray(item)) return {};
   const interesting = /(lat|lng|long|map|address|location|service|area|geo)/i;
@@ -53,16 +60,41 @@ function mapSignals(item) {
   return result;
 }
 
-async function get(path) {
+function publicTermIdentity(json) {
+  const list = Array.isArray(json)
+    ? json
+    : json && typeof json === "object"
+      ? (json.data ?? json.items ?? json.results ?? [])
+      : [];
+  if (!Array.isArray(list)) return [];
+  return list.slice(0, 100).map((item) => {
+    const result = {};
+    for (const key of ["id", "term_id", "name", "slug", "parent", "count"]) {
+      if (item && Object.hasOwn(item, key)) result[key] = item[key];
+    }
+    return result;
+  });
+}
+
+function optionSummary(json) {
+  if (!json || typeof json !== "object") return null;
+  const endpoints = Array.isArray(json.endpoints) ? json.endpoints : [];
+  return endpoints.map((endpoint) => ({
+    methods: endpoint.methods ?? [],
+    argNames: Object.keys(endpoint.args ?? {}).sort(),
+  }));
+}
+
+async function request(path, method = "GET") {
   const url = `${base}${path}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(url, {
-      method: "GET",
+      method,
       headers: {
         accept: "application/json",
-        "user-agent": "MarylandLocalGuide-ReadOnly-Preflight/1.0",
+        "user-agent": "MarylandLocalGuide-ReadOnly-Preflight/1.1",
       },
       redirect: "follow",
       signal: controller.signal,
@@ -74,10 +106,12 @@ async function get(path) {
     } catch {}
     return {
       url,
+      method,
       status: response.status,
       contentType: response.headers.get("content-type"),
       total: response.headers.get("x-wp-total"),
       totalPages: response.headers.get("x-wp-totalpages"),
+      allow: response.headers.get("allow"),
       json,
       bodyType: json === null ? "non-json" : typeOf(json),
     };
@@ -92,18 +126,15 @@ const report = {
   policy: {
     mode: "read-only public REST discovery",
     authenticated: false,
-    writes: false,
+    writeMethodsSent: false,
     userEndpointsQueried: false,
     rawListingValuesLogged: false,
-  },
-  vendorBaseline: {
-    officialDocsCandidateV1: "/wp-json/directorist/v1/listings",
-    note: "Candidate only until advertised by this site's REST root.",
+    methodsUsed: ["GET", "OPTIONS"],
   },
 };
 
 try {
-  const root = await get("/wp-json/");
+  const root = await request("/wp-json/");
   report.restRoot = {
     status: root.status,
     contentType: root.contentType,
@@ -132,66 +163,78 @@ try {
   report.directoristRoutes = relevantRouteNames.map((name) => ({
     route: name,
     methods: routeMethods(routes[name]),
-    args: routeArgs(routes[name]),
+    argsFromRoot: routeArgs(routes[name]),
   }));
 
-  const wpTypes = await get("/wp-json/wp/v2/types?context=view");
+  const [wpTypes, wpTaxonomies] = await Promise.all([
+    request("/wp-json/wp/v2/types?context=view"),
+    request("/wp-json/wp/v2/taxonomies?context=view"),
+  ]);
+
   report.wpTypes = {
     status: wpTypes.status,
-    total: wpTypes.total,
-    totalPages: wpTypes.totalPages,
     shape: wpTypes.json ? shape(wpTypes.json, 2) : null,
   };
+  report.wpTaxonomies = {
+    status: wpTaxonomies.status,
+    shape: wpTaxonomies.json ? shape(wpTaxonomies.json, 2) : null,
+  };
 
-  const v1ListingsRoute = relevantRouteNames.find(
-    (name) => /^\/directorist\/v1\/listings\/?$/.test(name),
-  );
+  const v1Options = await request("/wp-json/directorist/v1/listings", "OPTIONS");
+  const v2Options = await request("/wp-json/directorist/v2/listings", "OPTIONS");
+  report.listingCollectionOptions = {
+    v1: { status: v1Options.status, endpoints: optionSummary(v1Options.json) },
+    v2: { status: v2Options.status, endpoints: optionSummary(v2Options.json) },
+  };
 
-  if (v1ListingsRoute && routeMethods(routes[v1ListingsRoute]).includes("GET")) {
-    const listings = await get(
-      "/wp-json/directorist/v1/listings?per_page=1&order=desc&orderby=date",
-    );
-    const first = Array.isArray(listings.json)
-      ? listings.json[0]
-      : listings.json && typeof listings.json === "object"
-        ? (listings.json.data?.[0] ?? listings.json.listings?.[0] ?? null)
-        : null;
+  const [directories, listingsV1, listingsV2, categoriesAll, locationsAll] = await Promise.all([
+    request("/wp-json/directorist/v1/directories"),
+    request("/wp-json/directorist/v1/listings?per_page=1&order=desc&orderby=date"),
+    request("/wp-json/directorist/v2/listings?per_page=1&order=desc&orderby=date"),
+    request("/wp-json/directorist/v1/listings/categories?per_page=100&hide_empty=false"),
+    request("/wp-json/directorist/v1/listings/locations?per_page=100&hide_empty=false"),
+  ]);
 
-    report.listingsV1 = {
-      advertised: true,
-      status: listings.status,
-      total: listings.total,
-      totalPages: listings.totalPages,
-      responseShape: listings.json ? shape(listings.json, 2) : null,
-      firstItemShape: first ? shape(first, 3) : null,
-      mapSignalCandidates: mapSignals(first),
-    };
+  report.directoriesV1 = {
+    status: directories.status,
+    responseShape: directories.json ? shape(directories.json, 3) : null,
+  };
 
-    const categories = await get(
-      "/wp-json/directorist/v1/listings/categories?per_page=3&hide_empty=true",
-    );
-    report.categoriesV1 = {
-      status: categories.status,
-      total: categories.total,
-      totalPages: categories.totalPages,
-      responseShape: categories.json ? shape(categories.json, 2) : null,
-    };
+  const firstV1 = firstRecord(listingsV1.json);
+  report.listingsV1 = {
+    status: listingsV1.status,
+    total: listingsV1.total,
+    totalPages: listingsV1.totalPages,
+    responseShape: listingsV1.json ? shape(listingsV1.json, 2) : null,
+    firstItemShape: firstV1 ? shape(firstV1, 3) : null,
+    mapSignalCandidates: mapSignals(firstV1),
+  };
 
-    const locations = await get(
-      "/wp-json/directorist/v1/listings/locations?per_page=3&hide_empty=true",
-    );
-    report.locationsV1 = {
-      status: locations.status,
-      total: locations.total,
-      totalPages: locations.totalPages,
-      responseShape: locations.json ? shape(locations.json, 2) : null,
-    };
-  } else {
-    report.listingsV1 = {
-      advertised: false,
-      note: "The official-docs v1 collection route was not advertised with GET by this site's REST root.",
-    };
-  }
+  const firstV2 = firstRecord(listingsV2.json);
+  report.listingsV2 = {
+    status: listingsV2.status,
+    total: listingsV2.total,
+    totalPages: listingsV2.totalPages,
+    responseShape: listingsV2.json ? shape(listingsV2.json, 2) : null,
+    firstItemShape: firstV2 ? shape(firstV2, 3) : null,
+    mapSignalCandidates: mapSignals(firstV2),
+  };
+
+  report.categoriesV1 = {
+    status: categoriesAll.status,
+    total: categoriesAll.total,
+    totalPages: categoriesAll.totalPages,
+    responseShape: categoriesAll.json ? shape(categoriesAll.json, 2) : null,
+    publicTerms: publicTermIdentity(categoriesAll.json),
+  };
+
+  report.locationsV1 = {
+    status: locationsAll.status,
+    total: locationsAll.total,
+    totalPages: locationsAll.totalPages,
+    responseShape: locationsAll.json ? shape(locationsAll.json, 2) : null,
+    publicTerms: publicTermIdentity(locationsAll.json),
+  };
 
   report.result = "PASS_READ_DISCOVERY";
 } catch (error) {
@@ -205,9 +248,10 @@ await writeFile(outPath, JSON.stringify(report, null, 2) + "\n", "utf8");
 console.log("Directorist read-only preflight:", report.result);
 console.log("REST root:", report.restRoot?.status ?? "unavailable");
 console.log("Directorist namespaces:", report.namespaces?.directorist ?? []);
-console.log("Relevant Directorist routes:", report.directoristRoutes?.length ?? 0);
-console.log("V1 listings advertised:", report.listingsV1?.advertised ?? false);
-if (report.listingsV1?.status) console.log("V1 listings status:", report.listingsV1.status);
+console.log("V1 listings:", report.listingsV1?.status, "total", report.listingsV1?.total);
+console.log("V2 listings:", report.listingsV2?.status, "total", report.listingsV2?.total);
+console.log("Categories exposed:", report.categoriesV1?.publicTerms?.length ?? 0);
+console.log("Locations exposed:", report.locationsV1?.publicTerms?.length ?? 0);
 console.log("Artifact:", outPath);
 
 if (report.result !== "PASS_READ_DISCOVERY") process.exitCode = 2;
