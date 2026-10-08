@@ -52,9 +52,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 </div>
                 <h1 className="listing-title">{listing.title}</h1>
                 <p className="listing-location">{listing.locationLabel}</p>
-                <p className="listing-preview-note">
-                  Preview listing — example content, not a published business record.
-                </p>
+                {listing.representative ? (
+                  <p className="listing-preview-note">
+                    Preview listing — example content, not a published business record.
+                  </p>
+                ) : null}
                 <div className="listing-actions" aria-label="Listing actions">
                   <button className="button button-gold" type="button" disabled>Call</button>
                   <button className="button button-secondary" type="button" disabled>Website</button>
@@ -76,15 +78,17 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 <p>{listing.description}</p>
               </article>
 
-              <article className="detail-card">
-                <p className="eyebrow">What this listing offers</p>
-                <h2>Services Offered</h2>
-                <ul className="service-list">
-                  {listing.services.map((service) => (
-                    <li key={service}>{service}</li>
-                  ))}
-                </ul>
-              </article>
+              {listing.services.length > 0 ? (
+                <article className="detail-card">
+                  <p className="eyebrow">What this listing offers</p>
+                  <h2>Services Offered</h2>
+                  <ul className="service-list">
+                    {listing.services.map((service) => (
+                      <li key={service}>{service}</li>
+                    ))}
+                  </ul>
+                </article>
+              ) : null}
 
               <article className="detail-card">
                 <p className="eyebrow">Where they work</p>
@@ -139,8 +143,9 @@ export default async function ListingPage({ params }: ListingPageProps) {
         <section className="listing-proof">
           <div className="shell listing-proof-row">
             <p>
-              This preview intentionally omits ratings, prices, hours, phone numbers, addresses,
-              coordinates, availability, and verification claims.
+              {listing.representative
+                ? "This preview intentionally omits ratings, prices, hours, phone numbers, addresses, coordinates, availability, and verification claims."
+                : "Only publish-safe fields supplied by the canonical directory are rendered. Ratings, hours, contact actions, coordinates, availability, and verification claims remain omitted until separately accepted."}
             </p>
             <a className="text-link" href="/search?community=harford">
               Back to search →
