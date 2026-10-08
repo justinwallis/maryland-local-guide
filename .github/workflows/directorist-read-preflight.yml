@@ -1,0 +1,38 @@
+name: Directorist Read Preflight
+
+on:
+  push:
+    branches:
+      - directorist-read-preflight-probe
+    paths:
+      - scripts/probe-directorist-read.mjs
+      - .github/workflows/directorist-read-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Probe public WordPress and Directorist read contract
+        env:
+          MLG_SITE_ORIGIN: https://marylandlocalguide.com
+        run: node scripts/probe-directorist-read.mjs
+
+      - name: Upload read-only preflight report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: directorist-read-preflight
+          path: artifacts/directorist-read-preflight.json
+          if-no-files-found: error
+          retention-days: 7
