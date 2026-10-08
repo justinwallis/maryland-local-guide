@@ -29,6 +29,7 @@ type DirectoristDirectory = {
 };
 
 type DirectoristListing = {
+  [key: string]: unknown;
   id?: number;
   slug?: string;
   name?: string;
@@ -44,6 +45,7 @@ type DirectoristListing = {
   latitude?: number | string | null;
   longitude?: number | string | null;
   map_hidden?: boolean | number | string | null;
+  fields?: Record<string, unknown>;
 };
 
 const DEFAULT_ORIGIN = "https://marylandlocalguide.com";
@@ -143,6 +145,21 @@ function exactLocation(record: DirectoristListing): boolean {
   return !isMapHidden(record.map_hidden) && lat !== null && long !== null && Boolean(address);
 }
 
+function customFieldText(record: DirectoristListing, fieldKey: string): string {
+  const direct = record[fieldKey];
+  if (typeof direct === "string") return plainText(direct);
+
+  const nested = record.fields?.[fieldKey];
+  if (typeof nested === "string") return plainText(nested);
+
+  if (nested && typeof nested === "object") {
+    const value = (nested as Record<string, unknown>).value;
+    if (typeof value === "string") return plainText(value);
+  }
+
+  return "";
+}
+
 function listingCategory(
   record: DirectoristListing,
   categories: ReadonlyMap<number, DirectoristTerm>,
@@ -207,6 +224,8 @@ function toDetail(
   const locNames = listingLocations(record, locations);
   const exact = exactLocation(record);
   const address = plainText(record.address);
+  const servicesOffered = customFieldText(record, "custom-textarea");
+  const serviceAreaText = customFieldText(record, "custom-textarea-2");
 
   return {
     ...summary,
@@ -214,10 +233,16 @@ function toDetail(
       plainText(record.description) ||
       plainText(record.short_description) ||
       "No public description is available yet.",
-    services: [],
-    serviceArea: exact
-      ? locNames.join(", ") || "See the canonical listing for current service-area information."
-      : locNames.join(", ") || "Harford County",
+    services: servicesOffered
+      ? servicesOffered
+          .split(/\r?\n|;|•/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [],
+    serviceArea: serviceAreaText ||
+      (exact
+        ? locNames.join(", ") || "See the canonical listing for current service-area information."
+        : locNames.join(", ") || "Harford County"),
     locationDetail: exact
       ? `Public exact-location record${address ? `: ${address}` : ""}.`
       : "Service-area record; no storefront pin should be implied.",
