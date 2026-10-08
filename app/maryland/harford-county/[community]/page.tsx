@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { HubTemplate } from "../../../../components/HubTemplate";
 
@@ -24,10 +25,27 @@ const communities: Record<
   "bel-air": {
     title: "Bel Air",
     description:
-      "A representative community hub showing how the Maryland Local Guide system adapts within Harford County.",
+      "A Harford County community hub for practical services, project resources, local guides, and nearby discovery.",
     searchCommunity: "bel-air",
   },
 };
+
+export async function generateMetadata({ params }: CommunityPageProps): Promise<Metadata> {
+  const { community } = await params;
+  const current = communities[community];
+
+  if (!current) {
+    return {
+      title: "Harford County Community",
+      description: "Explore a Harford County community with Maryland Local Guide.",
+    };
+  }
+
+  return {
+    title: current.title,
+    description: current.description,
+  };
+}
 
 export default async function CommunityPage({ params }: CommunityPageProps) {
   const { community } = await params;

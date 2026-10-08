@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GuideTemplate } from "../../../components/GuideTemplate";
 
@@ -12,7 +13,7 @@ const guides = {
     dek:
       "A practical Harford County-first framework for defining the job, finding the right kind of help, and gathering the information a contractor or supplier will actually need.",
     areaLabel: "Harford County context",
-    updatedLabel: "Representative content",
+    updatedLabel: "Preview content",
     readingTime: "6 min read",
     takeaways: [
       "Define the problem before shopping for a contractor.",
@@ -38,7 +39,7 @@ const guides = {
         heading: "Keep local constraints visible",
         body: [
           "Property access, service area, community, and the difference between a storefront and a mobile service business can materially change which local options are useful.",
-          "The public product should preserve those distinctions rather than flattening every result into a generic map pin.",
+          "Those distinctions matter more than flattening every business into a generic map pin.",
         ],
       },
     ],
@@ -58,9 +59,9 @@ const guides = {
     title: "Before You Call for Well or Water Service",
     eyebrow: "Local service guide",
     dek:
-      "A representative guide template for gathering useful context before contacting a Harford County well or water-service professional.",
+      "A practical checklist for gathering useful context before contacting a Harford County well or water-service professional.",
     areaLabel: "Harford County context",
-    updatedLabel: "Representative content",
+    updatedLabel: "Preview content",
     readingTime: "5 min read",
     takeaways: [
       "Write down the symptom and when it started.",
@@ -72,14 +73,14 @@ const guides = {
         heading: "Describe what changed",
         body: [
           "A short timeline is more useful than guessing at the cause. Note whether the change was sudden or gradual and whether pressure, taste, odor, staining, or interruptions are involved.",
-          "Production versions of this guide should distinguish general preparation from safety-critical or regulated advice and cite authoritative sources where appropriate.",
+          "For safety-critical or regulated issues, use authoritative guidance and a qualified professional rather than treating this guide as diagnosis.",
         ],
       },
       {
         heading: "Gather system context",
         body: [
           "Useful non-diagnostic context can include whether the property uses a private well, whether treatment equipment is present, and whether the issue appears throughout the home.",
-          "The directory should help a resident reach the right service category without presenting the guide itself as professional diagnosis.",
+          "Use the directory to reach the right service category; this guide is preparation, not professional diagnosis.",
         ],
       },
     ],
@@ -94,6 +95,23 @@ const guides = {
     ],
   },
 } as const;
+
+export async function generateMetadata({ params }: GuidePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const guide = guides[slug as keyof typeof guides];
+
+  if (!guide) {
+    return {
+      title: "Local Guide",
+      description: "Practical local guidance from Maryland Local Guide.",
+    };
+  }
+
+  return {
+    title: guide.title,
+    description: guide.dek,
+  };
+}
 
 export default async function GuidePage({ params }: GuidePageProps) {
   const { slug } = await params;

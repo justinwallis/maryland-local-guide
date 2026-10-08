@@ -8,8 +8,9 @@ test("service-area listing renders truthfully on phone", async ({ page }) => {
     "Representative masonry service",
   );
   await expect(page.getByText("Service area", { exact: true })).toBeVisible();
-  await expect(page.getByText("Service area is not a storefront pin.")).toBeVisible();
-  await expect(page.getByText("Not a published business listing", { exact: false })).toBeVisible();
+  await expect(page.getByText("Service area, not a storefront.")).toBeVisible();
+  await expect(page.getByText("Preview listing — example content", { exact: false })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Call" })).toBeDisabled();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -27,8 +28,8 @@ test("exact-location listing renders distinct location treatment on desktop", as
     "Representative supplier storefront",
   );
   await expect(page.getByText("Exact-location record", { exact: true })).toBeVisible();
-  await expect(page.getByText("Exact location can support a storefront pin.")).toBeVisible();
-  await expect(page.getByText("No ratings, prices, hours", { exact: false })).toBeVisible();
+  await expect(page.getByText("Exact public location available.")).toBeVisible();
+  await expect(page.getByText("This preview intentionally omits ratings", { exact: false })).toBeVisible();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

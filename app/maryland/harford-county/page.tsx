@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { HubTemplate } from "../../../components/HubTemplate";
+
+export const metadata: Metadata = {
+  title: "Harford County",
+  description:
+    "Explore local services, communities, practical guides, and project resources across Harford County, Maryland.",
+};
 
 export default function HarfordCountyPage() {
   return (

@@ -31,7 +31,7 @@ test("well service guide renders cleanly on phone", async ({ page }) => {
   );
   await expect(page.getByText("Service-call notes")).toBeVisible();
   await expect(
-    page.getByText("Checklist state stays in your browser only", { exact: false }),
+    page.getByText("Checklist selections stay in your browser", { exact: false }),
   ).toBeVisible();
 
   const overflow = await page.evaluate(
