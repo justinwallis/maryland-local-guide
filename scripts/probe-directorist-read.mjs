@@ -69,20 +69,36 @@ function publicTermIdentity(json) {
   if (!Array.isArray(list)) return [];
   return list.slice(0, 100).map((item) => {
     const result = {};
-    for (const key of ["id", "term_id", "name", "slug", "parent", "count"]) {
+    for (const key of ["id", "term_id", "name", "slug", "parent", "count", "directory"]) {
       if (item && Object.hasOwn(item, key)) result[key] = item[key];
     }
     return result;
   });
 }
 
+function directoryIdentity(json) {
+  if (!Array.isArray(json)) return [];
+  return json.map((item) => ({
+    id: item?.id ?? null,
+    name: item?.name ?? null,
+    slug: item?.slug ?? null,
+    isDefault: item?.is_default ?? null,
+    count: item?.count ?? null,
+    newStatus: item?.new_status ?? null,
+    editStatus: item?.edit_status ?? null,
+  }));
+}
+
 function optionSummary(json) {
   if (!json || typeof json !== "object") return null;
   const endpoints = Array.isArray(json.endpoints) ? json.endpoints : [];
-  return endpoints.map((endpoint) => ({
-    methods: endpoint.methods ?? [],
-    argNames: Object.keys(endpoint.args ?? {}).sort(),
-  }));
+  return {
+    endpoints: endpoints.map((endpoint) => ({
+      methods: endpoint.methods ?? [],
+      argNames: Object.keys(endpoint.args ?? {}).sort(),
+    })),
+    schemaProperties: Object.keys(json.schema?.properties ?? {}).sort(),
+  };
 }
 
 async function request(path, method = "GET") {
@@ -183,8 +199,8 @@ try {
   const v1Options = await request("/wp-json/directorist/v1/listings", "OPTIONS");
   const v2Options = await request("/wp-json/directorist/v2/listings", "OPTIONS");
   report.listingCollectionOptions = {
-    v1: { status: v1Options.status, endpoints: optionSummary(v1Options.json) },
-    v2: { status: v2Options.status, endpoints: optionSummary(v2Options.json) },
+    v1: { status: v1Options.status, ...optionSummary(v1Options.json) },
+    v2: { status: v2Options.status, ...optionSummary(v2Options.json) },
   };
 
   const [directories, listingsV1, listingsV2, categoriesAll, locationsAll] = await Promise.all([
@@ -198,6 +214,7 @@ try {
   report.directoriesV1 = {
     status: directories.status,
     responseShape: directories.json ? shape(directories.json, 3) : null,
+    publicDirectories: directoryIdentity(directories.json),
   };
 
   const firstV1 = firstRecord(listingsV1.json);
