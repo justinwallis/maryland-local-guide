@@ -1,5 +1,6 @@
 import { SiteFooter } from "../../components/SiteFooter";
 import { SiteHeader } from "../../components/SiteHeader";
+import { getDirectoryReadAdapter } from "../../lib/directory/provider";
 
 type SearchPageProps = {
   searchParams: Promise<{
@@ -8,33 +9,6 @@ type SearchPageProps = {
     mode?: string;
   }>;
 };
-
-const representativeResults = [
-  {
-    category: "Masonry",
-    title: "Masonry contractor",
-    location: "Aberdeen & surrounding Harford County",
-    precision: "Service area",
-    summary: "Representative result-card state for a local masonry service.",
-    slug: "service-area-preview",
-  },
-  {
-    category: "Water & Well",
-    title: "Well service provider",
-    location: "Harford County",
-    precision: "Service area",
-    summary: "Representative result-card state for well and water service.",
-    slug: "service-area-preview",
-  },
-  {
-    category: "Tree Service",
-    title: "Tree service provider",
-    location: "Havre de Grace & nearby communities",
-    precision: "Service area",
-    summary: "Representative result-card state for local tree service.",
-    slug: "service-area-preview",
-  },
-];
 
 const communities: Record<string, string> = {
   harford: "Harford County",
@@ -46,8 +20,15 @@ const communities: Record<string, string> = {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const query = params.query?.trim() || "";
-  const community = communities[params.community || "harford"] || "Harford County";
+  const communityKey = params.community || "harford";
+  const community = communities[communityKey] || "Harford County";
   const emptyPreview = params.mode === "empty";
+
+  const directory = getDirectoryReadAdapter();
+  const resultSet = await directory.searchListings({
+    query,
+    community: communityKey,
+  });
 
   return (
     <main id="main-content">
@@ -80,7 +61,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </label>
             <label>
               <span>Community</span>
-              <select name="community" defaultValue={params.community || "harford"}>
+              <select name="community" defaultValue={communityKey}>
                 <option value="harford">Harford County</option>
                 <option value="aberdeen">Aberdeen</option>
                 <option value="havre-de-grace">Havre de Grace</option>
@@ -121,7 +102,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </label>
             <label>
               <span>Community</span>
-              <select defaultValue={params.community || "harford"}>
+              <select defaultValue={communityKey}>
                 <option value="harford">Harford County</option>
                 <option value="aberdeen">Aberdeen</option>
                 <option value="havre-de-grace">Havre de Grace</option>
@@ -151,18 +132,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 </div>
               </article>
             ) : (
-              representativeResults.map((result) => (
-                <article className="result-card" key={result.title}>
+              resultSet.items.map((result) => (
+                <article className="result-card" key={`${result.category}-${result.title}`}>
                   <div className="result-image" aria-hidden="true">
                     <span>Image area</span>
                   </div>
                   <div className="result-body">
                     <div className="result-meta-row">
                       <span className="result-category">{result.category}</span>
-                      <span className="precision-badge">{result.precision}</span>
+                      <span className="precision-badge">{result.precisionLabel}</span>
                     </div>
                     <h3>{result.title}</h3>
-                    <p className="result-location">{result.location}</p>
+                    <p className="result-location">{result.locationLabel}</p>
                     <p>{result.summary}</p>
                     <p className="representative-note">Not live directory data.</p>
                     <div className="result-actions">
