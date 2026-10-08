@@ -83,6 +83,8 @@ function createMockFetch() {
               locations: [10],
               description: "<p>Public exact-location listing.</p>",
               short_description: "Local materials and pickup.",
+              "custom-textarea": "Building materials; Local pickup",
+              "custom-textarea-2": "Aberdeen and nearby Harford County",
               address: "100 Example Street, Aberdeen, MD",
               latitude: "39.5000",
               longitude: "-76.1600",
@@ -191,7 +193,8 @@ test("staged WordPress adapter requires address coordinates and visible map for 
     source: "wordpress",
   });
   expect(listing?.description).toBe("Public exact-location listing.");
-  expect(listing?.services).toEqual([]);
+  expect(listing?.services).toEqual(["Building materials", "Local pickup"]);
+  expect(listing?.serviceArea).toBe("Aberdeen and nearby Harford County");
 });
 
 test("staged WordPress adapter drops non-published records even if an upstream response includes one", async () => {
