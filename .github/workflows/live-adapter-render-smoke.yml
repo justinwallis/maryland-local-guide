@@ -1,0 +1,44 @@
+name: Live Adapter Render Smoke
+
+on:
+  push:
+    branches:
+      - live-adapter-render-smoke-20261008
+    paths:
+      - tests/live-adapter-smoke.spec.ts
+      - .github/workflows/live-adapter-render-smoke.yml
+      - lib/directory/**
+      - app/search/page.tsx
+      - app/listing/**
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MLG_DIRECTORY_SOURCE: wordpress
+      MLG_LIVE_DIRECTORY_ACCEPTED: "true"
+      MLG_WORDPRESS_ORIGIN: https://marylandlocalguide.com
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/live-adapter-smoke.spec.ts --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-adapter-render-smoke
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
