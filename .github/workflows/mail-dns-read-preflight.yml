@@ -3,7 +3,8 @@ name: Mail DNS Read Preflight
 on:
   push:
     branches:
-      - mail-dns-read-preflight
+      - main
+      - resend-dns-verifier
     paths:
       - scripts/probe-mail-dns.mjs
       - .github/workflows/mail-dns-read-preflight.yml
