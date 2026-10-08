@@ -7,7 +7,7 @@ test("Harford County hub renders on desktop", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Harford County");
   await expect(page.getByText("Aberdeen", { exact: true })).toBeVisible();
   await expect(page.getByText("Havre de Grace", { exact: true })).toBeVisible();
-  await expect(page.getByText("Representative hub state")).toBeVisible();
+  await expect(page.getByText("Preview data")).toBeVisible();
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
