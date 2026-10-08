@@ -1,12 +1,6 @@
 name: Directorist Read Preflight
 
 on:
-  push:
-    branches:
-      - directorist-read-preflight-probe
-    paths:
-      - scripts/probe-directorist-read.mjs
-      - .github/workflows/directorist-read-preflight.yml
   workflow_dispatch:
 
 permissions:
