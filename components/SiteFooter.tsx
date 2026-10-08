@@ -15,23 +15,22 @@ export function SiteFooter() {
 
         <div>
           <h3>Explore</h3>
-          <a href="/#services">Find Services</a>
-          <a href="/#communities">Communities</a>
-          <a href="/#places">Places</a>
+          <a href="/search?community=harford">Find Services</a>
+          <a href="/maryland/harford-county">Communities</a>
+          <a href="/maryland/harford-county#local-guides">Places</a>
         </div>
 
-        <div id="places">
+        <div>
           <h3>For businesses</h3>
-          <a href="/#business">Add Your Business</a>
-          <a href="/#business">Update a Listing</a>
-          <a href="/#business">Suggest a Correction</a>
+          <p className="footer-status">Add your business <span>Opens before launch</span></p>
+          <p className="footer-status">Update a listing <span>Opens before launch</span></p>
+          <p className="footer-status">Suggest a correction <span>Opens before launch</span></p>
         </div>
 
         <div>
           <h3>About</h3>
-          <a href="/#resources">How it works</a>
+          <a href="/guides/planning-a-home-project">How it works</a>
           <a href="/#resources">Trust & sources</a>
-          <a href="/#resources">Contact</a>
         </div>
       </div>
     </footer>
