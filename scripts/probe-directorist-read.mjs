@@ -203,12 +203,26 @@ try {
     v2: { status: v2Options.status, ...optionSummary(v2Options.json) },
   };
 
-  const [directories, listingsV1, listingsV2, categoriesAll, locationsAll] = await Promise.all([
+  const [
+    directories,
+    listingsV1,
+    listingsV2,
+    categoriesAll,
+    locationsAll,
+    pendingV1,
+    draftV1,
+    editContextV1,
+    pendingV2,
+  ] = await Promise.all([
     request("/wp-json/directorist/v1/directories"),
     request("/wp-json/directorist/v1/listings?per_page=1&order=desc&orderby=date"),
     request("/wp-json/directorist/v2/listings?per_page=1&order=desc&orderby=date"),
     request("/wp-json/directorist/v1/listings/categories?per_page=100&hide_empty=false"),
     request("/wp-json/directorist/v1/listings/locations?per_page=100&hide_empty=false"),
+    request("/wp-json/directorist/v1/listings?status=pending&per_page=1"),
+    request("/wp-json/directorist/v1/listings?status=draft&per_page=1"),
+    request("/wp-json/directorist/v1/listings?context=edit&per_page=1"),
+    request("/wp-json/directorist/v2/listings?status=pending&per_page=1"),
   ]);
 
   report.directoriesV1 = {
@@ -235,6 +249,25 @@ try {
     responseShape: listingsV2.json ? shape(listingsV2.json, 2) : null,
     firstItemShape: firstV2 ? shape(firstV2, 3) : null,
     mapSignalCandidates: mapSignals(firstV2),
+  };
+
+  const countOnly = (response) => ({
+    status: response.status,
+    total: response.total,
+    totalPages: response.totalPages,
+    bodyCount: Array.isArray(response.json)
+      ? response.json.length
+      : Array.isArray(response.json?.data)
+        ? response.json.data.length
+        : null,
+  });
+
+  report.unauthenticatedBoundary = {
+    v1Pending: countOnly(pendingV1),
+    v1Draft: countOnly(draftV1),
+    v1EditContext: countOnly(editContextV1),
+    v2Pending: countOnly(pendingV2),
+    note: "Counts/status only; no pending/draft/edit record values are stored in the report.",
   };
 
   report.categoriesV1 = {
@@ -269,6 +302,8 @@ console.log("V1 listings:", report.listingsV1?.status, "total", report.listingsV
 console.log("V2 listings:", report.listingsV2?.status, "total", report.listingsV2?.total);
 console.log("Categories exposed:", report.categoriesV1?.publicTerms?.length ?? 0);
 console.log("Locations exposed:", report.locationsV1?.publicTerms?.length ?? 0);
+console.log("Unauth pending v1:", report.unauthenticatedBoundary?.v1Pending);
+console.log("Unauth edit context v1:", report.unauthenticatedBoundary?.v1EditContext);
 console.log("Artifact:", outPath);
 
 if (report.result !== "PASS_READ_DISCOVERY") process.exitCode = 2;
