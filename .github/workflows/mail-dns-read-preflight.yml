@@ -1,0 +1,32 @@
+name: Mail DNS Read Preflight
+
+on:
+  push:
+    branches:
+      - mail-dns-read-preflight
+    paths:
+      - scripts/probe-mail-dns.mjs
+      - .github/workflows/mail-dns-read-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Read public DNS records
+        run: node scripts/probe-mail-dns.mjs
+      - name: Upload DNS evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: mail-dns-preflight
+          path: artifacts/mail-dns-preflight.json
+          if-no-files-found: error
+          retention-days: 7
